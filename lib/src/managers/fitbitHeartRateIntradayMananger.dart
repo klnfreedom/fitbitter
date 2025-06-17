@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:fitbitter/fitbitter.dart';
-import 'package:fitbitter/src/data/fitbitHeartRateIntradayData.dart';
 import 'package:logger/logger.dart';
 
 class FitbitIntradayHeartRateManager extends FitbitDataManager {
@@ -10,7 +9,7 @@ class FitbitIntradayHeartRateManager extends FitbitDataManager {
     required super.clientSecret,
   });
 
-  Future<FitbitIntradayHeartRate> fetchData(
+  Future<FitbitData> fetchData(
     FitbitAPIURL fitbitUrl, {
     required Future<void> Function(FitbitCredentials) onRefresh,
   }) async {
@@ -28,7 +27,8 @@ class FitbitIntradayHeartRateManager extends FitbitDataManager {
   @override
   Future<List<FitbitData>> fetch(
     FitbitAPIURL url, {
-    required Future<void> Function(FitbitCredentials p1) onRefresh,
-  }) =>
-      throw UnimplementedError();
+    required Future<void> Function(FitbitCredentials) onRefresh,
+  }) {
+    throw UnimplementedError();
+  }
 }
