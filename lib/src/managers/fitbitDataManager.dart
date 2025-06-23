@@ -8,7 +8,7 @@ import 'package:fitbitter/src/fitbitConnector.dart';
 import 'package:fitbitter/src/urls/fitbitAPIURL.dart';
 
 typedef RefreshCallback = Future<void> Function(FitbitCredentials);
-typedef ResetCredentialsCallback = Future<void> Function();
+typedef ResetCredentialsCallback = Future<void> Function(Exception e);
 
 /// [FitbitDataManager] is an abstract class the manages the requests related to
 /// [FitbitData].
@@ -78,7 +78,7 @@ abstract class FitbitDataManager {
     final message = _extractMessage(response?.data);
 
     if (response?.statusCode != 429) {
-      onResetCredentials();
+      onResetCredentials(e);
     }
 
     throw FitbitException(
