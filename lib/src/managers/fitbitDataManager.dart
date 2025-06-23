@@ -34,13 +34,13 @@ abstract class FitbitDataManager {
 
   /// Method the obtains the response from the given [FitbitAPIURL].
   Future<dynamic> getResponse({required FitbitAPIURL fitbitUrl}) async {
-    // Check access token
-    await _checkAccessToken(fitbitUrl: fitbitUrl);
-
-    // Instantiate Dio and its Response
-    Dio dio = Dio();
-
     try {
+      // Check access token
+      await _checkAccessToken(fitbitUrl: fitbitUrl);
+
+      // Instantiate Dio and its Response
+      Dio dio = Dio();
+
       // get the fitbit profile data
       final response = await dio.get(
         fitbitUrl.url,
