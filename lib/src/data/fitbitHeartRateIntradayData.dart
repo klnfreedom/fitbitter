@@ -24,7 +24,7 @@ class FitbitHeartRateIntradayData implements FitbitData {
       {required Map<String, dynamic> json}) {
     return FitbitHeartRateIntradayData(
       userID: json['userID'],
-      dateOfMonitoring: DateTime.parse(json['dateTime']),
+      dateOfMonitoring: json['dateTime'] is String ? DateTime.parse(json['dateTime']) : json['dateTime'],
       value: json['value'],
     );
   } // fromJson
@@ -33,7 +33,7 @@ class FitbitHeartRateIntradayData implements FitbitData {
   Map<String, dynamic> toJson<T extends FitbitData>() {
     return <String, dynamic>{
       'userID': userID,
-      'dateTime': dateOfMonitoring,
+      'dateTime': dateOfMonitoring?.toIso8601String(),
       'value': value,
     };
   } // toJson
@@ -42,7 +42,7 @@ class FitbitHeartRateIntradayData implements FitbitData {
   String toString() {
     return (StringBuffer('FitbitHeartRateIntradayData(')
       ..write('userID: $userID, ')
-      ..write('dateOfMonitoring: $dateOfMonitoring, ')
+      ..write('dateOfMonitoring: ${dateOfMonitoring?.toIso8601String()}, ')
       ..write('value: $value, ')
       ..write(')'))
         .toString();
