@@ -108,7 +108,10 @@ class FitbitConnector {
       _logger.i('[Fitbit] Token Valid Check: ${response.data}');
       return (response.data['active'] as bool?) ?? false;
     } on DioException catch (e) {
-      return ![400, 401].contains(e.response?.statusCode);
+      if ([400, 401].contains(e.response?.statusCode)) {
+        return false;
+      }
+      rethrow;
     }
   }
 
@@ -132,13 +135,11 @@ class FitbitConnector {
 
     try {
       final result = await FlutterWebAuth2.authenticate(
-        url: authFormUrl.url,
-        callbackUrlScheme: callbackUrlScheme,
-        options: FlutterWebAuth2Options(
-          preferEphemeral: true,
-          
-        )
-      );
+          url: authFormUrl.url,
+          callbackUrlScheme: callbackUrlScheme,
+          options: FlutterWebAuth2Options(
+            preferEphemeral: true,
+          ));
 
       final code = Uri.parse(result).queryParameters['code'];
       if (code == null) throw Exception('Missing code in redirect URL');
