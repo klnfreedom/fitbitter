@@ -36,7 +36,7 @@ abstract class FitbitDataManager {
   Future<dynamic> getResponse({required FitbitAPIURL fitbitUrl}) async {
     try {
       // Check access token
-      await _checkAccessToken(fitbitUrl: fitbitUrl);
+      final credentials = await _checkAccessToken(fitbitUrl: fitbitUrl);
 
       // Instantiate Dio and its Response
       Dio dio = Dio();
@@ -47,45 +47,49 @@ abstract class FitbitDataManager {
         options: Options(
           contentType: Headers.jsonContentType,
           headers: {
-            'Authorization': 'Bearer ${fitbitUrl.fitbitCredentials!.fitbitAccessToken}',
+            'Authorization': 'Bearer ${credentials.fitbitAccessToken}',
           },
         ),
       );
 
       return response.data is String ? jsonDecode(response.data) : response.data;
     } on DioException catch (e) {
-      throw manageError(e);
+      final response = e.response;
+      final message = _extractMessage(response?.data);
+
+      if ([400, 401].contains(response?.statusCode)) {
+        onResetCredentials(e);
+      }
+
+      throw FitbitException(
+        statusCode: response?.statusCode,
+        message: message,
+        type: FitbitExceptionType.fromCode(response?.statusCode),
+      );
     }
   }
 
   /// Method that check the validity of the current access token.
-  Future<void> _checkAccessToken({required FitbitAPIURL fitbitUrl}) async {
-    //check if the access token is stil valid, if not refresh it
-    if (!await (FitbitConnector.isTokenValid(fitbitCredentials: fitbitUrl.fitbitCredentials!))) {
-      final refreshedCreds = await FitbitConnector.refreshToken(
-        fitbitCredentials: fitbitUrl.fitbitCredentials!,
-        clientID: clientID,
-        clientSecret: clientSecret,
-      );
+  Future<FitbitCredentials> _checkAccessToken({required FitbitAPIURL fitbitUrl}) async {
+    final credentials = fitbitUrl.fitbitCredentials;
+    if (credentials == null) {
+      throw StateError("Fitbit credentials are missing!");
+    } else {
+      // check if the access token is stil valid, if not refresh it
+      final isTokenValid = await FitbitConnector.isTokenValid(fitbitCredentials: credentials);
+      if (isTokenValid) {
+        return credentials;
+      } else {
+        final refreshedCredentials = await FitbitConnector.refreshToken(
+          fitbitCredentials: credentials,
+          clientID: clientID,
+          clientSecret: clientSecret,
+        );
+        await onRefreshCredentials(refreshedCredentials);
 
-      await onRefreshCredentials(refreshedCreds);
+        return refreshedCredentials;
+      }
     }
-  } //_checkAccessToken
-
-  /// Method that manages errors that could return from the Fitbit API.
-  Future<void> manageError(DioException e) async {
-    final response = e.response;
-    final message = _extractMessage(response?.data);
-
-    if (response?.statusCode != 429) {
-      onResetCredentials(e);
-    }
-
-    throw FitbitException(
-      statusCode: response?.statusCode,
-      message: message,
-      type: FitbitExceptionType.fromCode(response?.statusCode),
-    );
   }
 
   static String _extractMessage(dynamic data) {
