@@ -39,7 +39,7 @@ enum FitbitExceptionType {
   }
 }
 
-/// [FitbitException] is an abstract class defining an [Exception] that
+/// [FitbitException] is an base class defining an [Exception] that
 /// can be thrown by fitbitter.
 class FitbitException implements Exception {
   /// The [FitbitException] method.
@@ -59,5 +59,6 @@ class FitbitException implements Exception {
   });
 
   /// Returns the string representation of this object.
-  String toString();
+  @override
+  String toString() => 'FitbitException(message: $message, type: $type, statusCode: $statusCode)';
 } // FitbitException
